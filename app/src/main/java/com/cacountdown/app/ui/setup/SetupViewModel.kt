@@ -3,6 +3,7 @@ package com.cacountdown.app.ui.setup
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cacountdown.app.data.repository.ExamRepository
+import com.cacountdown.app.domain.model.CaCourse
 import com.cacountdown.app.domain.model.Exam
 import com.cacountdown.app.domain.usecase.GetCountdowns
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,12 +24,16 @@ val AVAILABLE_ATTEMPTS = listOf(
 enum class GroupChoice(val stored: String) { GROUP_1("G1"), GROUP_2("G2"), BOTH("BOTH") }
 
 data class SetupUiState(
+    val name: String = "",
+    val age: String = "",
+    val course: CaCourse = CaCourse.INTERMEDIATE,
     val selectedAttempt: Attempt = AVAILABLE_ATTEMPTS.first(),
     val selectedGroups: GroupChoice = GroupChoice.BOTH,
     val loadedExams: List<Exam> = emptyList(),
     val isLoading: Boolean = false,
-    val canStart: Boolean = false,
-)
+) {
+    val canStart: Boolean get() = name.isNotBlank() && loadedExams.isNotEmpty()
+}
 
 @HiltViewModel
 class SetupViewModel @Inject constructor(
@@ -42,6 +47,16 @@ class SetupViewModel @Inject constructor(
     init {
         loadExamsForSelectedAttempt()
     }
+
+    fun updateName(name: String) { _state.value = _state.value.copy(name = name) }
+
+    fun updateAge(age: String) {
+        if (age.isEmpty() || age.all(Char::isDigit)) {
+            _state.value = _state.value.copy(age = age)
+        }
+    }
+
+    fun selectCourse(course: CaCourse) { _state.value = _state.value.copy(course = course) }
 
     fun selectAttempt(attempt: Attempt) {
         _state.value = _state.value.copy(selectedAttempt = attempt)
@@ -61,7 +76,6 @@ class SetupViewModel @Inject constructor(
             _state.value = _state.value.copy(
                 loadedExams = exams,
                 isLoading = false,
-                canStart = exams.isNotEmpty(),
             )
         }
     }
@@ -70,7 +84,9 @@ class SetupViewModel @Inject constructor(
         viewModelScope.launch {
             val s = _state.value
             examRepository.saveUserSetup(
-                level = "INTER",
+                name = s.name.trim(),
+                age = s.age.toIntOrNull(),
+                level = s.course.stored,
                 attempt = s.selectedAttempt.id,
                 groups = s.selectedGroups.stored,
             )

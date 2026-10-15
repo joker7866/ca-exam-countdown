@@ -13,6 +13,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -30,6 +31,7 @@ import com.cacountdown.app.ui.theme.UrgentRed
 @Composable
 fun SubjectsScreen(
     onOpenSubject: (String) -> Unit,
+    onOpenTopics: (String) -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
@@ -67,6 +69,12 @@ fun SubjectsScreen(
                             "Recommended ${row.dailyTarget.requiredMinutesPerDay} min/day",
                         style = MaterialTheme.typography.bodySmall,
                     )
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                        TextButton(onClick = { onOpenTopics(row.exam.subjectCode) }) {
+                            Text("Topics (${row.progress.chaptersDone}/${row.progress.totalChapters})")
+                        }
+                        TextButton(onClick = { onOpenSubject(row.exam.subjectCode) }) { Text("Plan") }
+                    }
                 }
             }
         }

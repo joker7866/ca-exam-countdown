@@ -60,8 +60,17 @@ class ExamRepository @Inject constructor(
 
     fun observeUserSetup(): Flow<UserSetupEntity?> = userSetupDao.observe()
 
-    suspend fun saveUserSetup(level: String, attempt: String, groups: String) {
-        userSetupDao.upsert(UserSetupEntity(level = level, attempt = attempt, groups = groups, createdAt = Instant.now()))
+    suspend fun saveUserSetup(name: String, age: Int?, level: String, attempt: String, groups: String) {
+        userSetupDao.upsert(
+            UserSetupEntity(
+                name = name,
+                age = age,
+                level = level,
+                attempt = attempt,
+                groups = groups,
+                createdAt = Instant.now(),
+            ),
+        )
     }
 
     fun observeExamsForAttempt(attempt: String): Flow<List<Exam>> =

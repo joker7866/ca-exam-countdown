@@ -1,6 +1,7 @@
 package com.cacountdown.app.data.local
 
 import androidx.room.TypeConverter
+import com.cacountdown.app.data.local.entity.ActivityType
 import com.cacountdown.app.data.local.entity.ScheduleUpdateStatus
 import com.cacountdown.app.data.local.entity.SessionStatus
 import com.cacountdown.app.domain.model.ExamGroup
@@ -45,4 +46,10 @@ class Converters {
 
     @TypeConverter
     fun toScheduleUpdateStatusName(status: ScheduleUpdateStatus?): String? = status?.name
+
+    @TypeConverter
+    fun fromActivityTypeName(value: String?): ActivityType? = value?.let { ActivityType.valueOf(it) }
+
+    @TypeConverter
+    fun toActivityTypeName(type: ActivityType?): String? = type?.name
 }

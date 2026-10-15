@@ -24,7 +24,11 @@ import com.cacountdown.app.domain.model.ExamState
 import com.cacountdown.app.domain.model.UrgencyStatus
 
 @Composable
-fun PlanScreen(viewModel: PlanViewModel = hiltViewModel()) {
+fun PlanScreen(
+    onOpenTopics: (String) -> Unit = {},
+    onScheduleRevision: (String) -> Unit = {},
+    viewModel: PlanViewModel = hiltViewModel(),
+) {
     val state by viewModel.state.collectAsState()
 
     if (state.isLoading || state.exam == null) {
@@ -63,6 +67,13 @@ fun PlanScreen(viewModel: PlanViewModel = hiltViewModel()) {
                     LabeledRow("Revision", "${(progress.revisionFraction * 100).toInt()}%")
                     LabeledRow("Mock tests", "${progress.mocksDone} of ${progress.mocksPlanned}")
                     LabeledRow("Missed sessions this week", "${progress.missedSessionsThisWeek}")
+                    LabeledRow(
+                        "Last studied",
+                        state.daysSinceLastActivity?.let { "$it day${if (it == 1L) "" else "s"} ago" } ?: "Never",
+                    )
+                    if (state.hasOverdueScheduledItem) {
+                        LabeledRow("Scheduled item", "Overdue")
+                    }
                 }
             }
         }
@@ -84,8 +95,17 @@ fun PlanScreen(viewModel: PlanViewModel = hiltViewModel()) {
         }
 
         item {
-            Button(onClick = { viewModel.markChapterDone() }, modifier = Modifier.fillMaxWidth()) {
-                Text("Mark a chapter done")
+            Button(onClick = { onOpenTopics(exam.subjectCode) }, modifier = Modifier.fillMaxWidth()) {
+                Text("View topic checklist (${progress.chaptersDone}/${progress.totalChapters})")
+            }
+        }
+
+        item {
+            androidx.compose.material3.OutlinedButton(
+                onClick = { onScheduleRevision(exam.subjectCode) },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("Schedule a revision or mock test")
             }
         }
     }

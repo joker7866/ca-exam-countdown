@@ -3,6 +3,7 @@ package com.cacountdown.app.ui.plan
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cacountdown.app.data.local.dao.PlannedActivityDao
 import com.cacountdown.app.data.repository.ExamRepository
 import com.cacountdown.app.data.repository.ProgressRepository
 import com.cacountdown.app.domain.model.DailyTarget
@@ -34,6 +35,8 @@ data class PlanUiState(
     val dailyTarget: DailyTarget? = null,
     val urgency: UrgencyStatus? = null,
     val expectedSyllabusPercent: Int = 0,
+    val daysSinceLastActivity: Long? = null,
+    val hasOverdueScheduledItem: Boolean = false,
 )
 
 @HiltViewModel
@@ -41,6 +44,7 @@ class PlanViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val examRepository: ExamRepository,
     private val progressRepository: ProgressRepository,
+    private val plannedActivityDao: PlannedActivityDao,
     private val getCountdowns: GetCountdowns,
     private val getNextExam: GetNextExam,
     private val calculateDailyTarget: CalculateDailyTarget,
@@ -70,16 +74,27 @@ class PlanViewModel @Inject constructor(
         }
     }
 
-    private fun buildState(exam: Exam, progress: SubjectProgress?, setupDate: LocalDate) {
+    private suspend fun buildState(exam: Exam, progress: SubjectProgress?, setupDate: LocalDate) {
         if (progress == null) {
             _state.value = _state.value.copy(isLoading = true, exam = exam)
             return
         }
+        val today = LocalDate.now(clock)
         val countdown = getCountdowns(exam)
         val daysRemaining = (countdown.state as? ExamState.DaysLeft)?.days ?: 0L
-        val daysSinceSetup = ChronoUnit.DAYS.between(setupDate, LocalDate.now(clock))
+        val daysSinceSetup = ChronoUnit.DAYS.between(setupDate, today)
         val target = calculateDailyTarget(progress, daysRemaining.coerceAtLeast(0))
-        val urgency = calculateUrgency(progress, daysRemaining.coerceAtLeast(0), daysSinceSetup, target)
+        val daysSinceLastActivity = progress.lastActivityAt
+            ?.let { ChronoUnit.DAYS.between(it.atZone(clock.zone).toLocalDate(), today) }
+        val hasOverdue = plannedActivityDao.hasOverdueForSubject(exam.subjectCode, today)
+        val urgency = calculateUrgency(
+            progress,
+            daysRemaining.coerceAtLeast(0),
+            daysSinceSetup,
+            target,
+            daysSinceLastActivity,
+            hasOverdue,
+        )
         val expected = calculateUrgency.expectedSyllabusFraction(daysSinceSetup, daysRemaining.coerceAtLeast(0))
 
         _state.value = PlanUiState(
@@ -90,13 +105,8 @@ class PlanViewModel @Inject constructor(
             dailyTarget = target,
             urgency = urgency,
             expectedSyllabusPercent = (expected * 100).toInt(),
+            daysSinceLastActivity = daysSinceLastActivity,
+            hasOverdueScheduledItem = hasOverdue,
         )
-    }
-
-    fun markChapterDone() {
-        viewModelScope.launch {
-            val code = _state.value.exam?.subjectCode ?: return@launch
-            progressRepository.markChapterDone(code)
-        }
     }
 }

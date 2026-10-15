@@ -127,6 +127,45 @@ class CalculateUrgencyTest {
     }
 
     @Test
+    fun `attention when no activity logged for the threshold number of days`() {
+        val expected = calculate.expectedSyllabusFraction(daysSinceSetup = 50, daysRemaining = 60)
+        val result = calculate(
+            progress = progress(syllabusFraction = expected, revisionFraction = 0.9),
+            daysRemaining = 60,
+            daysSinceSetup = 50,
+            dailyTarget = target(hoursLeft = 10.0, studyDaysLeft = 60),
+            daysSinceLastActivity = 3, // default attentionNoActivityDays
+        )
+        assertThat(result).isEqualTo(UrgencyStatus.ATTENTION)
+    }
+
+    @Test
+    fun `on track when last activity was recent, under the no-activity threshold`() {
+        val expected = calculate.expectedSyllabusFraction(daysSinceSetup = 50, daysRemaining = 60)
+        val result = calculate(
+            progress = progress(syllabusFraction = expected, revisionFraction = 0.9),
+            daysRemaining = 60,
+            daysSinceSetup = 50,
+            dailyTarget = target(hoursLeft = 10.0, studyDaysLeft = 60),
+            daysSinceLastActivity = 2,
+        )
+        assertThat(result).isEqualTo(UrgencyStatus.ON_TRACK)
+    }
+
+    @Test
+    fun `attention when a scheduled item for the subject is overdue`() {
+        val expected = calculate.expectedSyllabusFraction(daysSinceSetup = 50, daysRemaining = 60)
+        val result = calculate(
+            progress = progress(syllabusFraction = expected, revisionFraction = 0.9),
+            daysRemaining = 60,
+            daysSinceSetup = 50,
+            dailyTarget = target(hoursLeft = 10.0, studyDaysLeft = 60),
+            hasOverdueScheduledItem = true,
+        )
+        assertThat(result).isEqualTo(UrgencyStatus.ATTENTION)
+    }
+
+    @Test
     fun `on track when everything is in line`() {
         val expected = calculate.expectedSyllabusFraction(daysSinceSetup = 50, daysRemaining = 60)
         val result = calculate(

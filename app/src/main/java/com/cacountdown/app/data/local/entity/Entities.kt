@@ -28,11 +28,13 @@ data class ExamScheduleEntity(
     val lastUpdated: Instant,
 )
 
-/** One row: the student's setup choices. */
+/** One row: the student's profile and setup choices. */
 @Entity(tableName = "user_setup")
 data class UserSetupEntity(
     @PrimaryKey val id: Int = 1,
-    val level: String,
+    val name: String = "",
+    val age: Int? = null,
+    val level: String, // course: "FOUNDATION" | "INTER" | "FINAL"
     val attempt: String,
     val groups: String, // "G1" | "G2" | "BOTH"
     val createdAt: Instant,
@@ -47,17 +49,20 @@ data class ExamOverrideEntity(
     val editedAt: Instant,
 )
 
-/** Drives syllabus %, revision %, hours left. */
+/**
+ * Drives revision %, mock-test tally and hours left. Syllabus % is no longer
+ * stored here — it's derived from [ChapterEntity] rows so the topic
+ * checklist and the daily-target maths can never disagree.
+ */
 @Entity(tableName = "subject_progress")
 data class SubjectProgressEntity(
     @PrimaryKey val subjectCode: String,
-    val totalChapters: Int,
-    val chaptersDone: Int,
     val revisionsPlanned: Int,
     val revisionsDone: Int,
     val mocksPlanned: Int,
     val mocksDone: Int,
     val estimatedHoursTotal: Double,
+    val lastActivityAt: Instant? = null,
 )
 
 enum class SessionStatus { PLANNED, DONE, MISSED }

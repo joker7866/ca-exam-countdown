@@ -15,6 +15,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,8 +23,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.cacountdown.app.domain.model.CaCourse
 import com.cacountdown.app.domain.model.Exam
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -60,9 +63,43 @@ fun SetupScreen(
                 Text("STEP 1 OF 2", style = androidx.compose.material3.MaterialTheme.typography.labelMedium)
                 Text("Set up your exams", style = androidx.compose.material3.MaterialTheme.typography.headlineMedium)
                 Text(
-                    "Pick your attempt and groups. We'll load the exam dates for you.",
+                    "Tell us about yourself, then pick your attempt and groups. We'll load the exam dates for you.",
                     style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
                 )
+            }
+
+            item {
+                OutlinedTextField(
+                    value = state.name,
+                    onValueChange = viewModel::updateName,
+                    label = { Text("Your name") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+
+            item {
+                OutlinedTextField(
+                    value = state.age,
+                    onValueChange = viewModel::updateAge,
+                    label = { Text("Age") },
+                    singleLine = true,
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+
+            item {
+                Text("Course", style = androidx.compose.material3.MaterialTheme.typography.labelLarge)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    CaCourse.entries.forEach { course ->
+                        FilterChip(
+                            selected = state.course == course,
+                            onClick = { viewModel.selectCourse(course) },
+                            label = { Text(course.label) },
+                        )
+                    }
+                }
             }
 
             item {

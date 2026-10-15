@@ -27,7 +27,7 @@ class MainActivity : ComponentActivity() {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     hasSetup?.let { completed ->
                         CaNavHost(
-                            startDestination = if (completed) CaDestination.Home.route else CaDestination.Setup.route,
+                            startDestination = if (completed) CaDestination.Home.route else CaDestination.Welcome.route,
                         )
                     }
                 }

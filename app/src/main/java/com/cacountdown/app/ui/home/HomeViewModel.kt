@@ -2,6 +2,7 @@ package com.cacountdown.app.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cacountdown.app.data.local.dao.PlannedActivityDao
 import com.cacountdown.app.data.repository.ExamRepository
 import com.cacountdown.app.data.repository.ProgressRepository
 import com.cacountdown.app.domain.model.DailyTarget
@@ -29,7 +30,6 @@ import javax.inject.Inject
 // Placeholder until the open question in the plan ("who sets estimated hours per
 // subject?") is answered; until then every subject gets the same budget.
 private const val DEFAULT_ESTIMATED_HOURS = 80.0
-private const val DEFAULT_TOTAL_CHAPTERS = 20
 
 data class SubjectRow(
     val exam: Exam,
@@ -51,6 +51,7 @@ data class HomeUiState(
 class HomeViewModel @Inject constructor(
     private val examRepository: ExamRepository,
     private val progressRepository: ProgressRepository,
+    private val plannedActivityDao: PlannedActivityDao,
     private val getCountdowns: GetCountdowns,
     private val getNextExam: GetNextExam,
     private val calculateDailyTarget: CalculateDailyTarget,
@@ -68,7 +69,7 @@ class HomeViewModel @Inject constructor(
 
             val exams = examRepository.observeExamsForAttempt(setup.attempt).first()
             exams.forEach { exam ->
-                progressRepository.ensureExists(exam.subjectCode, DEFAULT_TOTAL_CHAPTERS, DEFAULT_ESTIMATED_HOURS)
+                progressRepository.ensureExists(exam.subjectCode, DEFAULT_ESTIMATED_HOURS)
             }
 
             progressRepository.observeAll()
@@ -80,7 +81,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun buildState(
+    private suspend fun buildState(
         attempt: String,
         exams: List<Exam>,
         progressList: List<SubjectProgress>,
@@ -95,7 +96,17 @@ class HomeViewModel @Inject constructor(
             val countdown = getCountdowns(exam)
             val daysRemaining = (countdown.state as? ExamState.DaysLeft)?.days ?: 0L
             val target = calculateDailyTarget(progress, daysRemaining.coerceAtLeast(0))
-            val urgency = calculateUrgency(progress, daysRemaining.coerceAtLeast(0), daysSinceSetup, target)
+            val daysSinceLastActivity = progress.lastActivityAt
+                ?.let { ChronoUnit.DAYS.between(it.atZone(clock.zone).toLocalDate(), today) }
+            val hasOverdue = plannedActivityDao.hasOverdueForSubject(exam.subjectCode, today)
+            val urgency = calculateUrgency(
+                progress,
+                daysRemaining.coerceAtLeast(0),
+                daysSinceSetup,
+                target,
+                daysSinceLastActivity,
+                hasOverdue,
+            )
             SubjectRow(exam, countdown.state, progress, target, urgency)
         }
 

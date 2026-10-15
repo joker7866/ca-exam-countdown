@@ -1,5 +1,6 @@
 package com.cacountdown.app.domain.model
 
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -55,6 +56,8 @@ data class SubjectProgress(
     val estimatedHoursTotal: Double,
     val missedSessionsThisWeek: Int = 0,
     val hoursLoggedLast14Days: Double = 0.0,
+    /** Last time a topic was ticked off or a scheduled activity for this subject was completed; null if never. */
+    val lastActivityAt: Instant? = null,
 ) {
     val syllabusFraction: Double
         get() = if (totalChapters == 0) 0.0 else chaptersDone.toDouble() / totalChapters
@@ -94,6 +97,8 @@ data class UrgencyThresholds(
     val behindPaceMultiplierMin: Double = 1.5,
     val attentionSyllabusGapPoints: Double = 5.0,
     val attentionMissedSessions: Int = 2,
+    /** Days with no logged activity on a subject before Attention fires, even if the syllabus-gap maths looks fine. */
+    val attentionNoActivityDays: Int = 3,
 )
 
 data class Milestone(val daysBefore: Int)

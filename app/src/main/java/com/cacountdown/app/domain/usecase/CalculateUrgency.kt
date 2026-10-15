@@ -20,6 +20,8 @@ class CalculateUrgency @Inject constructor() {
         daysRemaining: Long,
         daysSinceSetup: Long,
         dailyTarget: DailyTarget,
+        daysSinceLastActivity: Long? = null,
+        hasOverdueScheduledItem: Boolean = false,
         thresholds: UrgencyThresholds = UrgencyThresholds(),
     ): UrgencyStatus {
         val expectedSyllabus = expectedSyllabusFraction(daysSinceSetup, daysRemaining, thresholds)
@@ -50,7 +52,9 @@ class CalculateUrgency @Inject constructor() {
         val isAttention =
             syllabusGapPoints in thresholds.attentionSyllabusGapPoints..thresholds.behindSyllabusGapPoints ||
                 progress.missedSessionsThisWeek >= thresholds.attentionMissedSessions ||
-                progress.mocksBehindPlan
+                progress.mocksBehindPlan ||
+                (daysSinceLastActivity != null && daysSinceLastActivity >= thresholds.attentionNoActivityDays) ||
+                hasOverdueScheduledItem
 
         if (isAttention) return UrgencyStatus.ATTENTION
 

@@ -3,6 +3,7 @@ package com.cacountdown.app
 import android.app.Application
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
+import com.cacountdown.app.notifications.NotificationChannels
 import com.cacountdown.app.work.WorkScheduler
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
@@ -17,6 +18,7 @@ class CaCountdownApp : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
+        NotificationChannels.createAll(this)
         WorkScheduler.scheduleDailyRefresh(this)
     }
 }

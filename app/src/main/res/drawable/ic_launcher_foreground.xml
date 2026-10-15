@@ -1,19 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Option B: "CA" monogram over a progress-dot row, per App icon — CA logo options.pdf -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
+
+    <!-- "C" — outer block minus an open-right inner block (evenOdd) -->
     <path
         android:fillColor="#F5A623"
-        android:pathData="M30,34 h48 a6,6 0 0 1 6,6 v40 a6,6 0 0 1 -6,6 h-48 a6,6 0 0 1 -6,-6 v-40 a6,6 0 0 1 6,-6 Z" />
+        android:fillType="evenOdd"
+        android:pathData="M17,24 H51 V64 H17 Z M27,34 H51 V54 H27 Z" />
+
+    <!-- "A" — two tapering legs plus a crossbar -->
     <path
-        android:fillColor="#0D1B33"
-        android:pathData="M30,34 h48 a6,6 0 0 1 6,6 v10 h-60 v-10 a6,6 0 0 1 6,-6 Z" />
+        android:fillColor="#F5A623"
+        android:pathData="M74,24 L57,64 L67,64 L74,40 Z" />
+    <path
+        android:fillColor="#F5A623"
+        android:pathData="M74,24 L91,64 L81,64 L74,40 Z" />
+    <path
+        android:fillColor="#F5A623"
+        android:pathData="M63,50 H85 V56 H63 Z" />
+
+    <!-- Progress-dot row: 3 filled (done), 2 dim (left to go) -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M40,28 v14 M68,28 v14"
-        android:strokeColor="#0D1B33"
-        android:strokeWidth="5"
-        android:strokeLineCap="round" />
+        android:pathData="M18,76 A4,4 0 1,0 26,76 A4,4 0 1,0 18,76 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M35,76 A4,4 0 1,0 43,76 A4,4 0 1,0 35,76 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M52,76 A4,4 0 1,0 60,76 A4,4 0 1,0 52,76 Z" />
+    <path
+        android:fillColor="#4A5570"
+        android:pathData="M69,76 A4,4 0 1,0 77,76 A4,4 0 1,0 69,76 Z" />
+    <path
+        android:fillColor="#4A5570"
+        android:pathData="M86,76 A4,4 0 1,0 94,76 A4,4 0 1,0 86,76 Z" />
 </vector>

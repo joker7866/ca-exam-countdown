@@ -13,18 +13,31 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.cacountdown.app.ui.alarms.AlarmsScreen
 import com.cacountdown.app.ui.alerts.AlertsScreen
+import com.cacountdown.app.ui.analysis.AnalysisScreen
+import com.cacountdown.app.ui.checklist.ChecklistScreen
+import com.cacountdown.app.ui.goals.GoalsScreen
 import com.cacountdown.app.ui.home.HomeScreen
+import com.cacountdown.app.ui.more.MoreScreen
+import com.cacountdown.app.ui.notes.NotesScreen
 import com.cacountdown.app.ui.plan.PlanScreen
+import com.cacountdown.app.ui.schedule.ScheduleScreen
 import com.cacountdown.app.ui.scheduleupdate.ScheduleUpdateScreen
+import com.cacountdown.app.ui.settings.SettingsScreen
 import com.cacountdown.app.ui.setup.SetupScreen
 import com.cacountdown.app.ui.subjects.SubjectsScreen
+import com.cacountdown.app.ui.support.SupportScreen
+import com.cacountdown.app.ui.timetable.TimetableScreen
+import com.cacountdown.app.ui.topics.TopicsScreen
+import com.cacountdown.app.ui.welcome.WelcomeScreen
 
 private val TAB_ROUTES = setOf(
     CaDestination.Home.route,
     CaDestination.Subjects.route,
     CaDestination.Plan.route,
     CaDestination.Alerts.route,
+    CaDestination.More.route,
 )
 
 @Composable
@@ -67,10 +80,13 @@ fun CaNavHost(startDestination: String) {
             startDestination = startDestination,
             modifier = androidx.compose.ui.Modifier.padding(padding),
         ) {
+            composable(CaDestination.Welcome.route) {
+                WelcomeScreen(onGetStarted = { navController.navigate(CaDestination.Setup.route) })
+            }
             composable(CaDestination.Setup.route) {
                 SetupScreen(onSetupComplete = {
                     navController.navigate(CaDestination.Home.route) {
-                        popUpTo(CaDestination.Setup.route) { inclusive = true }
+                        popUpTo(CaDestination.Welcome.route) { inclusive = true }
                     }
                 })
             }
@@ -78,19 +94,60 @@ fun CaNavHost(startDestination: String) {
                 HomeScreen(
                     onOpenSubject = { code -> navController.navigate(CaDestination.Plan.routeFor(code)) },
                     onOpenScheduleUpdate = { navController.navigate(CaDestination.ScheduleUpdate.route) },
+                    onOpenSchedule = { navController.navigate(CaDestination.Schedule.route) },
+                    onOpenAnalysis = { navController.navigate(CaDestination.Analysis.route) },
                 )
             }
             composable(CaDestination.Subjects.route) {
-                SubjectsScreen(onOpenSubject = { code -> navController.navigate(CaDestination.Plan.routeFor(code)) })
+                SubjectsScreen(
+                    onOpenSubject = { code -> navController.navigate(CaDestination.Plan.routeFor(code)) },
+                    onOpenTopics = { code -> navController.navigate(CaDestination.Topics.routeFor(code)) },
+                )
             }
             composable(CaDestination.Plan.route) {
-                PlanScreen()
+                PlanScreen(
+                    onOpenTopics = { code -> navController.navigate(CaDestination.Topics.routeFor(code)) },
+                    onScheduleRevision = { navController.navigate(CaDestination.Schedule.route) },
+                )
+            }
+            composable(CaDestination.Topics.route) {
+                TopicsScreen()
             }
             composable(CaDestination.Alerts.route) {
                 AlertsScreen()
             }
+            composable(CaDestination.More.route) {
+                MoreScreen(onNavigate = { route -> navController.navigate(route) })
+            }
             composable(CaDestination.ScheduleUpdate.route) {
                 ScheduleUpdateScreen(onDone = { navController.popBackStack() })
+            }
+            composable(CaDestination.Notes.route) {
+                NotesScreen()
+            }
+            composable(CaDestination.Checklist.route) {
+                ChecklistScreen()
+            }
+            composable(CaDestination.Timetable.route) {
+                TimetableScreen()
+            }
+            composable(CaDestination.Alarms.route) {
+                AlarmsScreen()
+            }
+            composable(CaDestination.Goals.route) {
+                GoalsScreen()
+            }
+            composable(CaDestination.Settings.route) {
+                SettingsScreen(onOpenSupport = { navController.navigate(CaDestination.Support.route) })
+            }
+            composable(CaDestination.Support.route) {
+                SupportScreen()
+            }
+            composable(CaDestination.Schedule.route) {
+                ScheduleScreen()
+            }
+            composable(CaDestination.Analysis.route) {
+                AnalysisScreen()
             }
         }
     }
